@@ -31,29 +31,24 @@ passport.use(
       callbackURL: '/auth/google/callback',
       proxy: true
     },
-    (accessToken, refreshToken, profile, done) => {
+    async (accessToken, refreshToken, profile, done) => {
       //using the mongoose model to see whether we already have a record
       //for the user. This query returns a promise; it's async.
-      User.findOne({ googleID: profile.id }).then(existingUser => {
-        if (existingUser) {
-          //record already exists
+      const existingUser = await User.findOne({ googleID: profile.id });
 
-          //done() takes two arguments; response to whether there was an error,
-          //then the user record, existing User, which tells passport that we're
-          //finished and found that particular user
-          done(null, existingUser);
-        } else {
-          //make a new record--none exists yet
-          new User({
-            googleID: profile.id,
-            name: profile.displayName
-          })
-            .save()
-            //without the save method, the new User won't persist in the database,
-            // but only in the javascript
-            .then(user => done(null, user));
-        }
-      });
+      if (existingUser) {
+        //record already exists
+        //done() takes two arguments; response to whether there was an error,
+        //then the user record, existing User, which tells passport that we're
+        //finished and found that particular user
+        return done(null, existingUser);
+      }
+
+      const user = await new User({ googleID: profile.id }).save();
+      done(null, user);
+      //make a new record--none exists yet
+      //without the save method, the new User won't persist in the database,
+      // but only in the javascript
     }
   )
 );
