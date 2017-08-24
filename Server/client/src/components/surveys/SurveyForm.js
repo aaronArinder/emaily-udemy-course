@@ -3,31 +3,8 @@ import { Link } from 'react-router-dom';
 import { reduxForm, Field } from 'redux-form';
 import SurveyField from './SurveyField';
 import _ from 'lodash';
-
-const FIELDS = [
-  {
-    label: 'Survey Title',
-    name: 'title',
-    noValueError: 'You must provide a title'
-  },
-  {
-    label: 'Subject Line',
-    name: 'subject',
-    noValueError: 'You must provide a subject'
-  },
-  {
-    label: 'Email Body',
-    name: 'body',
-    noValueError: 'You must provide a body'
-  },
-  {
-    label: 'Recipients',
-    name: 'emails',
-    noValueError: 'You must provide emails'
-  }
-];
-
-//Field is a helper for rendering any type of traditional html form element
+import validateEmails from '../../utils/emailValidation';
+import formFields from './formFields';
 
 //the _.map iterates over an array and returns a new array with different records
 //inside of it; the arrow function is called for each item in the array, just like
@@ -35,7 +12,7 @@ const FIELDS = [
 
 class SurveyForm extends Component {
   renderFields() {
-    return _.map(FIELDS, ({ label, name }) => {
+    return _.map(formFields, ({ label, name }) => {
       return (
         <Field
           key={name}
@@ -53,7 +30,7 @@ class SurveyForm extends Component {
   render() {
     return (
       <div>
-        <form onSubmit={this.props.handleSubmit(values => console.log(values))}>
+        <form onSubmit={this.props.handleSubmit(this.props.onSurveySubmit)}>
           {this.renderFields()}
           <Link to="/surveys" className="red btn-flat white-text">
             Cancel
@@ -71,7 +48,9 @@ class SurveyForm extends Component {
 function validate(values) {
   const errors = {};
 
-  _.each(FIELDS, ({ name, noValueError }) => {
+  errors.recipients = validateEmails(values.recipients || '');
+
+  _.each(formFields, ({ name, noValueError }) => {
     if (!values[name]) {
       errors[name] = noValueError;
     }
@@ -87,5 +66,6 @@ function validate(values) {
 
 export default reduxForm({
   validate,
-  form: 'surveyForm'
+  form: 'surveyForm',
+  destroyOnUnmount: false /*prevents the form data from being removed on hitting back button*/
 })(SurveyForm);
