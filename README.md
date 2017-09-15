@@ -2,4 +2,4 @@
 
 Udemy course covering Node/React/MongoDB/Mongoose by setting up email survey web app.
 
-Can be accessed via <a href={https://salty-stream-83043.herokuapp.com/}>heroku</a>.
+Can be accessed via https://salty-stream-83043.herokuapp.com/.
